@@ -1,5 +1,4 @@
 <?php 
-	include 'utils.php';
 	/**
 	 * structure active_users.json
 	 * @var string id 
@@ -71,7 +70,7 @@
 	 * @var
 	 * @return string Added user id
 	 */
-	function addUserInSearch() {
+	function addInSearch() {
 		$users = getJsonFromFile('tmp/active_users.json');
 		$user = (object) array("link" => null, "mmr" => 1);
 		$lastId = 'guest_'.(getLastUserId($users)+1);
@@ -81,6 +80,27 @@
 		return $user->id;
 	}
 	
+	/**
+	 * drop users from active_users.json
+	 * @param array &$arr
+	 * @param array $users
+	 * @return 
+	 *
+	 */
+	function dropFromSearch(&$arr, $users) {
+		foreach($arr as $id => $u) {
+			if (in_array($id, $users)) {
+					if (isset($u->link)) {
+						$userlink = $u->link;
+						$arr->$userlink->link = null;
+					}
+					unset($arr->$id);
+			}
+		}
+		setJsonToFile('tmp/active_users.json', $arr);
+		return $arr;
+	}
+
 	/**
 	 * get last user id in array
 	 * @param array @arr
@@ -95,9 +115,4 @@
 		return $count;
 	}
 
-	function searchHandler() {
-		//$users = getJsonFromFile('tmp/active_users.json');
-		//$members = array($_SESSION['user'], $users->$_SESSION['user']->link);
-		//addChat($members);
-	}
 ?>

@@ -1,6 +1,4 @@
 <?php 
-	include 'utils.php';
-
     /**
      * chat.json structure
      * @var string $id
@@ -9,14 +7,29 @@
      *
      */
 
+    /**
+     * add new chat in chat.json
+     * @param array $members
+     * @return execute record to file
+     *
+     */
     function addChat($members) {
         $chats = getJsonFromFile('tmp/chat.json');
-        $newId = getLastChatId($chat);
+        $newId = getLastChatId($chats)+1;
         $newChat = null;
         $newChat->members = $members;
         $newChat->history = null;
         $chats->$newId = $newChat;
-        setJsonToFile('tmp/chat.json', $chats);
+        return setJsonToFile('tmp/chat.json', $chats);
+    }
+
+    /**
+     * clear chat.json
+     * @return execute record to file
+     *
+     */
+    function clearChat() {
+        return setJsonToFile('tmp/chat.json', null);
     }
 
     /**
