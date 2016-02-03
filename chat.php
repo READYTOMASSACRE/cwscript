@@ -43,4 +43,63 @@
         foreach($arr as $id => $user) $count = $id;
         return $count;
     }
+
+    /**
+     * get history chat if user in chat
+     * @param array $chats
+     * @param string $username
+     * @return string history or false if user is not chatting
+     *
+     */
+    function getChat($chats, $username) {
+        if(isUserInChat($username)) return $chats->$_SESSION['chat']->history;
+        foreach($chats as $id => $chat) {
+            if(in_array($username, $chat->members)) {
+                return $chat->history;
+            }
+        }
+        return false;
+    } 
+
+    /**
+     * removing chat from chat.json
+     * @param int $id
+     * @return execute record to file
+     *
+     */
+    function removeChat($id) {
+        $chats = getJsonFromFile('tmp/chat.json');
+        unset($chats->$id);
+        return setJsonToFile('tmp/chat.json', $chats);
+    }
+
+    /**
+     * send message to chat.json
+     * @param string $who
+     * @param string $message
+     * @return history
+     *
+     */
+    function sendChat($who, $message) {
+        $chats = getJsonFromFile('tmp/chat.json');
+        $id = getChatByName($chats, $who);
+        if($id == -1) return false;
+        $chats->$id->history.='<b>'.$who.':</b> '.$message.'<br>';
+        setJsonToFile('tmp/chat.json', $chats);
+        return $chats->$id->history;
+    }
+
+    /**
+    * get id by $name from $chats
+    * @param array $chats
+    * @param string @name
+    * @return string $id or false if can't found
+    *
+    */
+    function getChatByName($chats, $name) {
+        foreach($chats as $id => $chat)
+            if(in_array($name, $chat->members))
+                return $id;
+        return -1;
+    }
 ?>

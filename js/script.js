@@ -3,34 +3,26 @@ var chat = new Chat();
 
 $(document).ready(function() {
 	$.post('index.php');
-	$('.attention').text('ClanWar Search Script v1.0 loaded in 0.00 seconds');
-	$('#chat').hide();
+	$('.footer>div').text('ClanWar Search Script v1.0 loaded in 0.00 seconds');
+	$('.chat').hide();
 	
 	registerClickEvents();
-	$('.attention').text('ClanWar Search Script v1.0 loaded in ' + (((new Date).getTime() - _time.getTime())/1000) + ' seconds');
+	$('.footer>div').text('ClanWar Search Script v1.0 loaded in ' + (((new Date).getTime() - _time.getTime())/1000) + ' seconds');
 
 });
 
 registerClickEvents = function() {
 
-	$('#button-search').on('click', function() {
-		alert('search button');
-		$.post('search.php?init');
-	});
-/*	$('#chat-button-send').on('click', function() {
-		var msg = $('#chat-text').val();
-		$('#chat-text').val('');
-		chat.send(msg);
-	});	
+	$('button.btn.large.green').on('click', function() {
+		$('button.btn.large.green').text('SEARCHING...');
+	})
 
-	$('#create-chat').on('click', function() {
-		$.post('chat.php?create', function() {alert('zero'); });
-		if($('#chat').is(':hidden')) alert('Can\'t create new chat')
-	});
-
-	$('#toogle-chat').on('click', function() {
-		var chatLabel = $('#toogle-chat').text();
-		chatLabel = chatLabel == 'Open chat' ? 'Close chat' : 'Open chat';
-		$('#toogle-chat').text(chatLabel);
-	});*/
+	$('button.btn.small.green').on('click', function() {
+		var message = $('input.chat-input').val();
+		chat.send(message);
+/*		$('input.chat-input').val(null);
+		$.post('index.php?send', {"message":message}, function(data) {
+			$('.chat-body').html(data);
+		})
+*/	});
 }

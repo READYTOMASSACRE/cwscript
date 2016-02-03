@@ -17,19 +17,21 @@ Chat = function(Block) {
 	this.send = function(message) {
 		return $.ajax({
 			type: 'POST',
-			url: 'chat.php?send',
-			data: { 'author' : 'guest_1', 'message' : message },
-			success: self.update
+			url: 'index.php?send',
+			data: { 'message' : message },
+			success: function(History) {
+				self.history = History;
+				$(self.block).html(self.history);
+			}
 		});
 	}
 
 	this.update = function() {
 		return $.ajax({
 			type: 'GET',
-			url: 'chat.php?update',
-			success: function(chatHistory) {
-				self.history = (JSON.parse(chatHistory)).history;
-				//alert(self.history);
+			url: 'index.php?update',
+			success: function(History) {
+				self.history = History;
 				$(self.block).html(self.history);
 			}
 		});
