@@ -12,12 +12,18 @@
 	 * @param array $arr
 	 * 
 	 */
+	$cantSearch = false;
+	
 	function search($arr) {
-		$arr = getJsonFromFile('tmp/active_users.json');
+		if($GLOBALS['cantSearch']) return false;
+
 		foreach ($arr as $id => $u) {
 			findOpponent($arr, $id);
 		}
+		unset($arr->lastId);
+		$GLOBALS['cantSearch'] = true;
 		setJsonToFile('tmp/active_users.json', $arr);
+		return $arr;
 	}
 
 	/**
@@ -65,19 +71,21 @@
 	}
 
 	/**
-	 * @TODO realize add users by id (not autoincrement if this not firsttime)
+	 * add in search users in active_users.json
 	 * @param string $userId 
-	 * @var
-	 * @return string Added user id
+	 * @return bool true if added, false if not 
+	 *
 	 */
 	function addInSearch() {
-		$users = getJsonFromFile('tmp/active_users.json');
-		$user = (object) array("link" => null, "mmr" => 1);
-		$lastId = 'guest_'.(getLastUserId($users)+1);
-		echo 'lastId: '.$lastId.'<br>';
-		$users->$lastId = $user;
-		setJsonToFile('tmp/active_users.json', $users);
-		return $user->id;
+		$activeUsers = getJsonFromFile('tmp/active_users.json');
+		if(!empty($activeUsers->$_SESSION['user'])) return false;
+		$users = getJsonFromFile('tmp/users.json');
+		unset($users->lastId);
+		$activeUsers->$_SESSION['user']->link = null;
+		$activeUsers->$_SESSION['user']->mmr = $users->$_SESSION['user']->mmr;
+		setJsonToFile('tmp/active_users.json', $activeUsers);
+		$GLOBALS['cantSearch'] = false;
+		return true;
 	}
 	
 	/**

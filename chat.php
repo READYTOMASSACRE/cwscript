@@ -46,13 +46,13 @@
 
     /**
      * get history chat if user in chat
-     * @param array $chats
      * @param string $username
      * @return string history or false if user is not chatting
      *
      */
     function getChat($chats, $username) {
-        if(isUserInChat($username)) return $chats->$_SESSION['chat']->history;
+        $chatId = isUserInChat($username);
+        if($chatId) return $chats->$chatId->history;
         foreach($chats as $id => $chat) {
             if(in_array($username, $chat->members)) {
                 return $chat->history;
@@ -90,16 +90,27 @@
     }
 
     /**
-    * get id by $name from $chats
-    * @param array $chats
-    * @param string @name
-    * @return string $id or false if can't found
-    *
-    */
+     * get id by $name from $chats
+     * @param array $chats
+     * @param string @name
+     * @return string $id or false if can't found
+     *
+     */
     function getChatByName($chats, $name) {
         foreach($chats as $id => $chat)
             if(in_array($name, $chat->members))
                 return $id;
         return -1;
+    }
+
+    /**
+     * get id chat if user chatting
+     * @param string $username
+     * @return int id chat
+     *
+     */
+    function isUserInChat($username) {
+        $users = getJsonFromFile('tmp/users.json');
+        return $users->$username->chat;
     }
 ?>

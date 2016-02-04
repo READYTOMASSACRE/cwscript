@@ -95,6 +95,8 @@
 	#attention
 */
 .attention {
+	text-align: left;
+	padding: 5px;
 	position: relative;
 	color:#fff;
 	border-radius: 5px;
@@ -102,6 +104,9 @@
 	display: inline;
 }
 
+.attention b {
+	color: orange;
+}
 .attention.right {
 	float:right;
 }
