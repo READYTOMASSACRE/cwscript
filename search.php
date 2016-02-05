@@ -4,8 +4,6 @@
 	 * @var string lastId
 	 * @var int count
 	 * @var string id 
-	 * id -> @var string link
-	 * id -> @var int mmr
 	 *
 	 */
 
@@ -20,7 +18,8 @@
 		if($GLOBALS['cantSearch']) return false;
 		$users = getJsonFromFile('tmp/active_users.json');
 		foreach ($users as $id => $u) {
-			findOpponent($users, $id);
+			if ($id[0] == 'g')
+				findOpponent($users, $id);
 		}
 
 		$GLOBALS['cantSearch'] = true;
@@ -36,13 +35,9 @@
 	 *
 	 */
 	function findOpponent(&$users, $finder) {
-		if(isset($users->$finder->link)) return false;
-		//echo 'Вхождение в функцию getit($users, $finder), с параметром '.$finder.'<br>';
-		foreach ($users as $target => $u) {
-			if($finder != $target && empty($u->link)) {
-				if($users->$finder->mmr >= $u->mmr) {
-					$users->$finder->link = $target;
-					$u->link = $finder;
+		foreach ($users as $target => $value) {
+			if($finder != $target) {
+				if($users->$finder >= $value) {
 					$chatId = addChat(array($finder, $target));
 					dropFromSearch($users, array($finder, $target), $chatId);
 					break;
@@ -86,11 +81,7 @@
 		$users = getJsonFromFile('tmp/users.json');
 		$activeUsers->lastId = $id;
 		$activeUsers->count += 1;
-		$info = null;
-		$info->link = null;
-		$info->mmr = $users->$id->mmr;
-		$info->visited = $users->$id->visited;
-		$activeUsers->$id = $info;
+		$activeUsers->$id = $users->$id->mmr;
 		dropUser($users, $id);
 		setJsonToFile('tmp/active_users.json', $activeUsers);
 		setJsonToFile('tmp/users.json', $users);
@@ -115,6 +106,7 @@
 			$obj->visited = time();
 			addUser($id, $obj);
 			unset($arr->$user);
+			$arr->count -=1;
 		}
 		return $arr;
 	}

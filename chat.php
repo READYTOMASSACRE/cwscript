@@ -1,26 +1,31 @@
 <?php 
     /**
      * chat.json structure
-     * @var string $id
-     * $id -> @var array $members
-     * $id -> @var string $history
+     * @var int lastId
+     * @var int count
+     * @var string ID
+     *  @var array $members
+     *  @var array $history
      *
      */
 
     /**
      * add new chat in chat.json
      * @param array $members
-     * @return execute record to file
+     * @return int
      *
      */
     function addChat($members) {
         $chats = getJsonFromFile('tmp/chat.json');
-        $newId = getLastChatId($chats)+1;
+        $chats->lastId = $chats->lastId != null ? $chats->lastId+1 : 0;
+        $chats->count += 1;
+        $newId = $chats->lastId;
         $newChat = null;
         $newChat->members = $members;
         $newChat->history = null;
         $chats->$newId = $newChat;
-        return setJsonToFile('tmp/chat.json', $chats);
+        setJsonToFile('tmp/chat.json', $chats);
+        return $newId;
     }
 
     /**
@@ -28,20 +33,8 @@
      * @return execute record to file
      *
      */
-    function clearChat() {
+    function clearChats() {
         return setJsonToFile('tmp/chat.json', null);
-    }
-
-    /**
-     * get last user id in array
-     * @param array @arr
-     * @return last added user id
-     *
-     */
-    function getLastChatId($arr) {
-        $count = -1;
-        foreach($arr as $id => $user) $count = $id;
-        return $count;
     }
 
     /**
@@ -50,26 +43,22 @@
      * @return string history or false if user is not chatting
      *
      */
-    function getChat($chats, $username) {
-        $chatId = isUserInChat($username);
-        if($chatId) return $chats->$chatId->history;
-        foreach($chats as $id => $chat) {
-            if(in_array($username, $chat->members)) {
-                return $chat->history;
-            }
-        }
-        return false;
+    function getChatHistory($user) {
+        $chats = getJsonFromFile('tmp/chat.json');
+        $id = getChatByName($user);
+        if($id) return $chats->$id->history;
     } 
 
     /**
-     * removing chat from chat.json
+     * drop chat from chat.json
      * @param int $id
      * @return execute record to file
      *
      */
-    function removeChat($id) {
+    function dropChat($id) {
         $chats = getJsonFromFile('tmp/chat.json');
         unset($chats->$id);
+        $chats->count -= 1;
         return setJsonToFile('tmp/chat.json', $chats);
     }
 
@@ -82,39 +71,24 @@
      */
     function sendChat($who, $message) {
         $chats = getJsonFromFile('tmp/chat.json');
-        $id = getChatByName($chats, $who);
-        if($id == -1) return false;
-        $chats->$id->history.='<b>'.$who.':</b> '.$message.'<br>';
+        $id = getChatByName($who);
+        if(empty($id) || $chats->$id) return false;
+        if (empty($chats->$id->history)) $chats->$id->history = array();
+        $formattedMessage = '<b>'.$who.':</b> '.$message.'<br>';
+        array_push($chats->$id->history, $formattedMessage);
         setJsonToFile('tmp/chat.json', $chats);
-        return $chats->$id->history;
+        return json_encode($chats->$id->history);
     }
 
     /**
-     * get id by $name from $chats
-     * @param array $chats
-     * @param string @name
-     * @return string $id or false if can't found
+     * get chat by $name
+     * @param string $name
+     * @return id
      *
      */
-    function getChatByName($chats, $name) {
-        foreach($chats as $id => $chat)
-            if(in_array($name, $chat->members))
-                return $id;
-        return -1;
-    }
-
-    /**
-     * get id chat if user chatting
-     * @param string $username
-     * @return int id chat
-     *
-     */
-    function isUserInChat($username) {
+    function getChatByName($name) {
         $users = getJsonFromFile('tmp/users.json');
-        return $users->$username->chat;
+        return $users->$name->chat;
     }
 
-    function getUp() {
-        echo 1;
-    }
 ?>

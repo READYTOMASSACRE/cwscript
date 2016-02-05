@@ -6,18 +6,20 @@
 	 *
 	 */
 	function addUser($id, $obj) {
-		if(isset($_SESSION['user']) && empty($id)) return false;
 
-		$newUser = null;
+		if(isset($_SESSION['user']) && empty($id)) return $_SESSION['user'];
+
 		$users = getJsonFromFile('tmp/users.json');
-		$users->count += 1;
-		
+		$newUser = null;
+
 		if (isset($id)) {
-			$users->$id = $obj;
 			$users->lastId = $id;
+			$users->count += 1;
+			$users->$id = $obj;
 		} 
 		else {
-			$users->lastId = $users ? $users->lastId+1 : 0;
+			$users->lastId = $users->lastId === null ? 0 : $users->lastId+1;
+			$users->count += 1;
 			$newUser = 'guest_'.$users->lastId;
 			$_SESSION['user'] = $newUser;
 			$users->$newUser = getDefaultData();
@@ -55,7 +57,7 @@
 	 * @return execute record to file
 	 *
 	 */
-	function dropUsersBySession(int $timeout) {
+	function dropUsersBySession($timeout) {
 		$users = getJsonFromFile('tmp/users.json');
 		foreach($users as $id => $user) {
 			if($id[0] == 'g' &&  ((time() - $user->visited) > $timeout))
