@@ -1,6 +1,8 @@
 <?php 
 	/**
 	 * structure active_users.json
+	 * @var string lastId
+	 * @var int count
 	 * @var string id 
 	 * id -> @var string link
 	 * id -> @var int mmr
@@ -14,13 +16,13 @@
 	 */
 	$cantSearch = false;
 	
-	function search($arr) {
+	function search() {
 		if($GLOBALS['cantSearch']) return false;
-
-		foreach ($arr as $id => $u) {
-			findOpponent($arr, $id);
+		$users = getJsonFromFile('tmp/active_users.json');
+		foreach ($users as $id => $u) {
+			findOpponent($users, $id);
 		}
-		unset($arr->lastId);
+
 		$GLOBALS['cantSearch'] = true;
 		setJsonToFile('tmp/active_users.json', $arr);
 		return $arr;
@@ -37,10 +39,12 @@
 		if(isset($users->$finder->link)) return false;
 		//echo 'Вхождение в функцию getit($users, $finder), с параметром '.$finder.'<br>';
 		foreach ($users as $target => $u) {
-			if($finder != $target) {
-				if(empty($u->link) && ($users->$finder->mmr <= $u->mmr)) {
+			if($finder != $target && empty($u->link)) {
+				if($users->$finder->mmr >= $u->mmr) {
 					$users->$finder->link = $target;
 					$u->link = $finder;
+					$chatId = addChat(array($finder, $target));
+					dropFromSearch($users, array($finder, $target), $chatId);
 					break;
 				}
 			}
@@ -72,20 +76,27 @@
 
 	/**
 	 * add in search users in active_users.json
-	 * @param string $userId 
 	 * @return bool true if added, false if not 
 	 *
 	 */
 	function addInSearch() {
+		if ($_SESSION['status'] == (1 || 2)) return false;
+		$id = $_SESSION['user'];
 		$activeUsers = getJsonFromFile('tmp/active_users.json');
-		if(!empty($activeUsers->$_SESSION['user'])) return false;
 		$users = getJsonFromFile('tmp/users.json');
-		unset($users->lastId);
-		$activeUsers->$_SESSION['user']->link = null;
-		$activeUsers->$_SESSION['user']->mmr = $users->$_SESSION['user']->mmr;
+		$activeUsers->lastId = $id;
+		$activeUsers->count += 1;
+		$info = null;
+		$info->link = null;
+		$info->mmr = $users->$id->mmr;
+		$info->visited = $users->$id->visited;
+		$activeUsers->$id = $info;
+		dropUser($users, $id);
 		setJsonToFile('tmp/active_users.json', $activeUsers);
+		setJsonToFile('tmp/users.json', $users);
 		$GLOBALS['cantSearch'] = false;
-		return true;
+		$_SESSION['status'] = 1;
+		return $id;
 	}
 	
 	/**
@@ -95,17 +106,16 @@
 	 * @return 
 	 *
 	 */
-	function dropFromSearch(&$arr, $users) {
-		foreach($arr as $id => $u) {
-			if (in_array($id, $users)) {
-					if (isset($u->link)) {
-						$userlink = $u->link;
-						$arr->$userlink->link = null;
-					}
-					unset($arr->$id);
-			}
+	function dropFromSearch(&$arr, $users, $chat) {
+		foreach($users as $user) {
+			$id = $user;
+			$obj->mmr = $arr->$user->mmr;
+			$obj->chat = $chat;
+			$obj->online = true;
+			$obj->visited = time();
+			addUser($id, $obj);
+			unset($arr->$user);
 		}
-		setJsonToFile('tmp/active_users.json', $arr);
 		return $arr;
 	}
 

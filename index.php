@@ -1,11 +1,23 @@
 <?php 
-	if(!session_id()) session_start();
 	include 'chat.php';
 	include 'search.php';
 	include 'utils.php';
+	include 'users.php';
+	if(!session_id()) session_start();
 
+	$u = 'gg';
+	function foo(&$t) {
+		$t = 'zz';
+		$t->key0 = 'key1';
+	}
+	echo $u;
+	foo($u);
+	echo '<br>'.$u.'<br>';
+	foreach($u as $k => $v) {
+		echo $k.' '.$v.'<br>';
+	}
 	if(isset($_REQUEST['register'])) {
-		echo newUser();
+		echo addUser();
 	}
 
 	if(isset($_REQUEST['send'])) {
@@ -55,28 +67,4 @@
 		}
 		return $var;
 	}
-
-
-	function newUser() {
-		if (!empty($_SESSION['user']))
-			return $_SESSION['user'];
-
-		$users = getJsonFromfile('tmp/users.json');
-		if ($users->lastId === null) {
-			echo 'THAT IS NEW USER<br>';
-			$newId = 'guest_0'; 
-			$users->lastId = 0;
-		}
-		else {
-			$newId = 'guest_'.($users->lastId + 1);
-			$users->lastId += 1;
-		}
-		$newUser->mmr = 1;
-		$newUser->chat = null;
-		$newUser->visited = time();
-		$users->$newId = $newUser;
-		setJsonToFile('tmp/users.json', $users);
-		$_SESSION['user'] = $newId;
-		return $newId;
-		}
 ?>

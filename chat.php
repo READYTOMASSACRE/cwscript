@@ -113,4 +113,8 @@
         $users = getJsonFromFile('tmp/users.json');
         return $users->$username->chat;
     }
+
+    function getUp() {
+        echo 1;
+    }
 ?>
