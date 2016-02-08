@@ -12,6 +12,7 @@
 		$users = getJsonFromFile('tmp/users.json');
 		$newUser = null;
 
+
 		if (isset($id)) {
 			$users->lastId = $id;
 			$users->count += 1;
@@ -22,8 +23,11 @@
 			$users->count += 1;
 			$newUser = 'guest_'.$users->lastId;
 			$_SESSION['user'] = $newUser;
+			$_SESSION['status'] = 0;
+			$_SESSION['chat'] = null;
 			$users->$newUser = getDefaultData();
 		}
+
 		setJsonToFile('tmp/users.json', $users);
 		return $newUser;
 	}

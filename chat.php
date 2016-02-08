@@ -17,7 +17,7 @@
      */
     function addChat($members) {
         $chats = getJsonFromFile('tmp/chat.json');
-        $chats->lastId = $chats->lastId != null ? $chats->lastId+1 : 0;
+        $chats->lastId = $chats->lastId === null ? 0 : $chats->lastId+1;
         $chats->count += 1;
         $newId = $chats->lastId;
         $newChat = null;
@@ -43,10 +43,10 @@
      * @return string history or false if user is not chatting
      *
      */
-    function getChatHistory($user) {
+    function getChatHistory($id) {
         $chats = getJsonFromFile('tmp/chat.json');
-        $id = getChatByName($user);
         if($id) return $chats->$id->history;
+        return false;
     } 
 
     /**
@@ -71,8 +71,8 @@
      */
     function sendChat($who, $message) {
         $chats = getJsonFromFile('tmp/chat.json');
-        $id = getChatByName($who);
-        if(empty($id) || $chats->$id) return false;
+        $id = $_SESSION['chat'];
+        if($id === null || $chats->$id === null) return false;
         if (empty($chats->$id->history)) $chats->$id->history = array();
         $formattedMessage = '<b>'.$who.':</b> '.$message.'<br>';
         array_push($chats->$id->history, $formattedMessage);
@@ -80,15 +80,13 @@
         return json_encode($chats->$id->history);
     }
 
-    /**
-     * get chat by $name
-     * @param string $name
-     * @return id
-     *
-     */
-    function getChatByName($name) {
+    function showChat() {
         $users = getJsonFromFile('tmp/users.json');
-        return $users->$name->chat;
+        if(isset($users->$_SESSION['user']->chat)) {
+            $_SESSION['status'] = 2;
+            $_SESSION['chat'] = $users->$_SESSION['user']->chat;
+            return getChatHistory($_SESSION['chat']);
+        }
+        return false;
     }
-
 ?>

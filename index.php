@@ -3,9 +3,9 @@
 	include 'search.php';
 	include 'utils.php';
 	include 'users.php';
+	
 	if(!session_id()) session_start();
 
-	//dropUsersBySession(0);
 	if(isset($_REQUEST['register'])) {
 		echo addUser();
 	}
@@ -19,9 +19,7 @@
 	}
 
 	if(isset($_REQUEST['update'])) {
-		if($_REQUEST['update'] == 'chat')
-			echo chatHandler('update');
-		else echo searchHandler('update');
+		echo searchHandler('update');
 	}
 
 	function searchHandler($key) {
@@ -29,16 +27,10 @@
 		switch ($key) {
 			case 'search':
 				addInSearch();
-				$result = searchHandler('update');
 				break;
-			case 'update':
-				$users = getJsonFromFile('tmp/active_users.json');
-				foreach($users as $id => $u) {
-					if(isset($u->link)) {
-						addChat(array($id, $u->link));	
-						dropFromSearch($users, array($id, $u->link));
-					}
-				}
+			case 'update':				
+				if($_SESSION['status'] == 2) $result = getChatHistory($_SESSION['chat']);
+				else if ($_SESSION['status'] == 1) $result = searchResult();
 			default:
 				break;
 		}
@@ -57,7 +49,7 @@
 		$var = null;
 		switch ($key) {
 			case 'show':	
-				$var = getChatHistory($_SESSION['user']);
+				$var = getChatHistory($_SESSION['chat']);
 				break;
 			case 'send':
 				//$username = getUsername();

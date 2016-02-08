@@ -23,8 +23,8 @@
 		}
 
 		$GLOBALS['cantSearch'] = true;
-		setJsonToFile('tmp/active_users.json', $arr);
-		return $arr;
+		setJsonToFile('tmp/active_users.json', $users);
+		return true;
 	}
 
 	/**
@@ -36,7 +36,7 @@
 	 */
 	function findOpponent(&$users, $finder) {
 		foreach ($users as $target => $value) {
-			if($finder != $target) {
+			if($finder != $target && $target[0] == 'g') {
 				if($users->$finder >= $value) {
 					$chatId = addChat(array($finder, $target));
 					dropFromSearch($users, array($finder, $target), $chatId);
@@ -111,6 +111,15 @@
 		return $arr;
 	}
 
+
+	function searchResult() {
+		if (isset($_SESSION['chat'])) return true;
+		$users = getJsonFromFile('tmp/users.json');
+		if($users->$_SESSION['user']->chat === null) return false;
+		$_SESSION['chat'] = $users->$_SESSION['user']->chat;
+		$_SESSION['status'] = 2;
+		return true;
+	}
 	/**
 	 * get last user id in array
 	 * @param array @arr

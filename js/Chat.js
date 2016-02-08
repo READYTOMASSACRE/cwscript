@@ -21,7 +21,7 @@ Chat = function(Block) {
 			data: { 'message' : message },
 			success: function(History) {
 				$(self.block).html('');
-				if(!self.history) $(self.block).html('failed to load history chat');
+				if(!History) $(self.block).html('failed to load history chat');
 				else {
 					self.history = JSON.parse(History);
 					self.history.forEach(function(h) { $(self.block).append(h) });
