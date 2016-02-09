@@ -15,7 +15,7 @@
 
 		if (isset($id)) {
 			if($users === null)  $users = new stdClass();
-			$users->lastId = substr($id, 6);
+			$users->lastId = (int) substr($id, 6);
 			$users->count += 1;
 			$users->$id = $obj;
 		} 

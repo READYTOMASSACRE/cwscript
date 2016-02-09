@@ -47,7 +47,7 @@
 		$id = $_SESSION['user'];
 		$activeUsers = getJsonFromFile('active_users.json');
 		$users = getJsonFromFile('users.json');
-		$activeUsers->lastId = substr($id, 6);
+		$activeUsers->lastId = (int) substr($id, 6);
 		$activeUsers->count += 1;
 		$activeUsers->$id = $users->$id->mmr;
 		dropUser($users, $id);
@@ -69,7 +69,7 @@
 		foreach($users as $user) {
 			$id = $user;
 			$obj = new stdClass();
-			$obj->mmr = $arr->$user;
+			$obj->mmr = $arr->$id;
 			$obj->chat = $chat;
 			$obj->online = true;
 			$obj->visited = time();

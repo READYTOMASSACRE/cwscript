@@ -12,9 +12,9 @@
 	}
 
 	function writelog($string) {
-		$log = file_get_contents('/var/hosting/work.local/www/tmp/log.txt');
+		$log = file_get_contents('/var/www/my.work/tmp/log.txt');
 		$log .= $string."\n";
-		file_put_contents('/var/hosting/work.local/www/tmp/log.txt', $log);
+		file_put_contents('/var/www/my.work/tmp/log.txt', $log);
 	}
 
 	function search() {

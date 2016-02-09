@@ -8,11 +8,11 @@
 
 	if(isset($_REQUEST['init'])) {
 		$result = new stdClass();
-		$users = counterUsersOnline();
-		$result->totalOnline = $users->total;
-		$result->searchOnline = $users->search;
 		$result->username = garbageCollector();
 		$result->status = $_SESSION['status'];
+		$users = counterUsersOnline();
+		$result->totalOnline = $users->total;
+		$result->searchOnline = $users->search;		
 		echo json_encode($result);
 	}
 
@@ -89,24 +89,23 @@
 					$users->$_SESSION['user']->online = true;
 					$users->$_SESSION['user']->visited = time();
 				}
+				setJsonToFile('users.json', $users);
 			} else {
 				$activeUsers = getJsonFromFile('active_users.json');
 				
+				if(isset($activeUsers->$_SESSION['user'])) {
+					if(isset($_REQUEST['quit'])) {
+						$_SESSION['status'] = 0;
+						dropFromSearch($activeUsers, array($_SESSION['user']));
+						setJsonToFile('active_users.json', $activeUsers);
+						garbageCollector();
+					}
+				}
 				// old data, need update
-				if($activeUsers->$_SESSION['user'] === null) {
+				else {
 					$_SESSION['user'] = null;
 					addUser();
 				} 
-				/**
-				 * @todo normal setup offline 
-				 */
-				else if(isset($_SESSION['quit'])) {
-					$string = $_SESSION['user'];
-					$_SESSION['user'] = null;
-					dropFromSearch($activeUsers, array($string));
-					setJsonToFile('active_users.json', $activeUsers);
-					garbageCollector();
-				}
 			}
 			return $_SESSION['user'];
 		}
