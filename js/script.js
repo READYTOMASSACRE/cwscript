@@ -12,11 +12,13 @@ $(document).ready(function() {
 
 		try {
 			var data = JSON.parse(data);
-			$('div.attention.right').html('Total users online: 0 / Users in search: 0 <br> You\'r name is: <b>'+data.username+'</b>');
+			$('div.attention.right').html('Total users online: <b>' + data.totalOnline + '</b> / Users in search: <b>' + data.searchOnline + '</b><br> You\'r name is: <b>'+data.username+'</b>');
 			$('.footer>div').text('ClanWar Search Script v1.0 loaded in ' + (((new Date).getTime() - _time.getTime())/1000) + ' seconds');
-			search.destroy();
-			$('.search-result').html('Loading chat...');
-			setTimeout(chat.init, 2000);
+			if (data.status == 2) { 
+				search.destroy();
+				$('.search-result').html('Loading chat...');
+				setTimeout(chat.init, 2000);
+			}
 		} 
 		catch(e) {
 			$('div.attention.right').html('Total users online: 0 / Users in search: 0 <br> You\'r name is: <b>'+data+'</b>');

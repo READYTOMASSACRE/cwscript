@@ -7,30 +7,12 @@
 	if(!session_id()) session_start();
 
 	if(isset($_REQUEST['init'])) {
-
 		$result = new stdClass();
-		$users = countOnlineUsers();
+		$users = counterUsersOnline();
 		$result->totalOnline = $users->total;
 		$result->searchOnline = $users->search;
 		$result->username = garbageCollector();
-
-/*		if(isset($_SESSION['user'])) {
-		
-
-
-			$users = getJsonFromFile('users.json');
-			if($users->$_SESSION['user']) {
-				$users->$_SESSION['user']->online = true;
-				$users->$_SESSION['user']->visited = time();
-			}
-		}
-
-		if ($_SESSION['status'] == 2) {
-			$obj = new stdClass();
-			$obj->status = 2;
-			$obj->username = $_SESSION['user'];
-			echo json_encode($obj);
-		}*/
+		$result->status = $_SESSION['status'];
 		echo json_encode($result);
 	}
 
@@ -131,5 +113,19 @@
 		else {
 			return addUser();
 		}
+	}
+
+	function counterUsersOnline() {
+		$obj = new stdClass();
+		$users = getJsonFromFile('users.json');
+		$ausers = getJsonFromFile('active_users.json');
+		foreach ($users as $key => $value) {
+			if($key[0] == 'g') 
+				if($value->online)
+					$obj->total += 1;
+		}
+		$obj->total += $ausers->count;
+		$obj->search = $ausers->count;
+		return $obj;
 	}
 ?>
