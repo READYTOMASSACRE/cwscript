@@ -9,12 +9,13 @@
 
 		if(isset($_SESSION['user']) && empty($id)) return $_SESSION['user'];
 
-		$users = getJsonFromFile('tmp/users.json');
+		$users = getJsonFromFile('users.json');
 		$newUser = null;
 
 
 		if (isset($id)) {
-			$users->lastId = $id;
+			if($users === null)  $users = new stdClass();
+			$users->lastId = substr($id, 6);
 			$users->count += 1;
 			$users->$id = $obj;
 		} 
@@ -28,7 +29,7 @@
 			$users->$newUser = getDefaultData();
 		}
 
-		setJsonToFile('tmp/users.json', $users);
+		setJsonToFile('users.json', $users);
 		return $newUser;
 	}
 
@@ -62,12 +63,12 @@
 	 *
 	 */
 	function dropUsersBySession($timeout) {
-		$users = getJsonFromFile('tmp/users.json');
+		$users = getJsonFromFile('users.json');
 		foreach($users as $id => $user) {
 			if($id[0] == 'g' &&  ((time() - $user->visited) > $timeout))
 				dropUser($users, $id);
 		}
-		return setJsonToFile('tmp/users.json', $users);
+		return setJsonToFile('users.json', $users);
 	}
 
 	/**

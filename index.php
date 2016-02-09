@@ -6,8 +6,36 @@
 	
 	if(!session_id()) session_start();
 
-	if(isset($_REQUEST['register'])) {
-		echo addUser();
+	if(isset($_REQUEST['init'])) {
+
+		$result = new stdClass();
+		$users = countOnlineUsers();
+		$result->totalOnline = $users->total;
+		$result->searchOnline = $users->search;
+		$result->username = garbageCollector();
+
+/*		if(isset($_SESSION['user'])) {
+		
+
+
+			$users = getJsonFromFile('users.json');
+			if($users->$_SESSION['user']) {
+				$users->$_SESSION['user']->online = true;
+				$users->$_SESSION['user']->visited = time();
+			}
+		}
+
+		if ($_SESSION['status'] == 2) {
+			$obj = new stdClass();
+			$obj->status = 2;
+			$obj->username = $_SESSION['user'];
+			echo json_encode($obj);
+		}*/
+		echo json_encode($result);
+	}
+
+	if(isset($_REQUEST['quit'])) {
+		garbageCollector();
 	}
 
 	if(isset($_REQUEST['send'])) {
@@ -15,7 +43,11 @@
 	}
 
 	if(isset($_REQUEST['search'])) {
-		echo searchHandler('search');
+		if($_REQUEST['search'] == 'update') 
+			echo searchHandler('update');
+		else {
+			echo searchHandler('search');
+		}
 	}
 
 	if(isset($_REQUEST['update'])) {
@@ -59,5 +91,45 @@
 				break;
 		}
 		return $var;
+	}
+
+
+
+	function garbageCollector($params) {
+
+		if(isset($_SESSION['user'])) {
+			$users = getJsonFromFile('users.json');
+
+			if(isset($users->$_SESSION['user'])) {
+				if(isset($_REQUEST['quit']))
+					$users->$_SESSION['user']->online = false;
+				else {
+					$users->$_SESSION['user']->online = true;
+					$users->$_SESSION['user']->visited = time();
+				}
+			} else {
+				$activeUsers = getJsonFromFile('active_users.json');
+				
+				// old data, need update
+				if($activeUsers->$_SESSION['user'] === null) {
+					$_SESSION['user'] = null;
+					addUser();
+				} 
+				/**
+				 * @todo normal setup offline 
+				 */
+				else if(isset($_SESSION['quit'])) {
+					$string = $_SESSION['user'];
+					$_SESSION['user'] = null;
+					dropFromSearch($activeUsers, array($string));
+					setJsonToFile('active_users.json', $activeUsers);
+					garbageCollector();
+				}
+			}
+			return $_SESSION['user'];
+		}
+		else {
+			return addUser();
+		}
 	}
 ?>

@@ -7,27 +7,23 @@ Chat = function(Block) {
 	
 
 	this.init = function() {
-		self.timer = setInterval(self.update, 5000);
+		if (!self.timer) self.timer = setInterval(self.update, 1000);
+		$('.chat').show();
+		$('.search-result').html('Chat loaded.');
 	}
 
 	this.destroy = function() {
 		if (self.timer) clearInterval(self.timer);
-		delete(self);
+		$('.chat').hide();
 	}
 	this.send = function(message) {
 		return $.ajax({
 			type: 'POST',
 			url: 'index.php?send',
 			data: { 'message' : message },
-			success: function(History) {
-				$(self.block).html('');
-				if(!History) $(self.block).html('failed to load history chat');
-				else {
-					self.history = JSON.parse(History);
-					self.history.forEach(function(h) { $(self.block).append(h) });
-				}
-				$(self.block).scrollTop($(self.block).get(0).scrollHeight);
+			success: function(data) {
 				$('input[value="message"').val('');
+				self.renderChat(data);
 			}
 		});
 	}
@@ -36,18 +32,21 @@ Chat = function(Block) {
 		return $.ajax({
 			type: 'GET',
 			url: 'index.php?update',
-			success: function(History) {
-				self.history = History;
-				$(self.block).html(self.history);
-			}
+			success: self.renderChat
 		});
 	}
 
-	/** 
-	 *
-	 * start constructor processes 
-	 *
-	 */
-	//this.init();
+
+	this.renderChat = function(History) {
+		if(!History) $(self.block).html('failed to load history chat');
+		else {
+			$(self.block).html('');
+			self.history = JSON.parse(History);
+			self.history.forEach(function(h) { $(self.block).append(h) });
+		}
+		$(self.block).scrollTop($(self.block).get(0).scrollHeight);
+	}
+
+
 
 }

@@ -16,15 +16,16 @@
      *
      */
     function addChat($members) {
-        $chats = getJsonFromFile('tmp/chat.json');
+        $chats = getJsonFromFile('chat.json');
+        if ($chats === null) $chats = new stdClass();
         $chats->lastId = $chats->lastId === null ? 0 : $chats->lastId+1;
         $chats->count += 1;
         $newId = $chats->lastId;
-        $newChat = null;
+        $newChat = new stdClass();
         $newChat->members = $members;
         $newChat->history = null;
         $chats->$newId = $newChat;
-        setJsonToFile('tmp/chat.json', $chats);
+        setJsonToFile('chat.json', $chats);
         return $newId;
     }
 
@@ -34,7 +35,7 @@
      *
      */
     function clearChats() {
-        return setJsonToFile('tmp/chat.json', null);
+        return setJsonToFile('chat.json', null);
     }
 
     /**
@@ -43,10 +44,22 @@
      * @return string history or false if user is not chatting
      *
      */
-    function getChatHistory($id) {
-        $chats = getJsonFromFile('tmp/chat.json');
-        if($id) return $chats->$id->history;
-        return false;
+    function getChatHistory($id, $chats) {
+    if ($chats === null) $chats = getJsonFromFile('chat.json');
+    if($id === null) return false; 
+    $history = $chats->$id->history;
+        foreach($history as $id => $message) {
+            $iterator = strpos($message,":");
+            if ($_SESSION['user'] == substr($message, 0, $iterator))
+                $message = '<b>You</b>'.substr($message, $iterator);
+            else {
+                $message = '<b>'.substr($message, 0, $iterator).'</b>'.substr($message, $iterator);
+            }
+            $message .= '<br>';
+            $history[$id] = $message;
+        }
+        return json_encode($history);
+        
     } 
 
     /**
@@ -56,10 +69,10 @@
      *
      */
     function dropChat($id) {
-        $chats = getJsonFromFile('tmp/chat.json');
+        $chats = getJsonFromFile('chat.json');
         unset($chats->$id);
         $chats->count -= 1;
-        return setJsonToFile('tmp/chat.json', $chats);
+        return setJsonToFile('chat.json', $chats);
     }
 
     /**
@@ -70,18 +83,18 @@
      *
      */
     function sendChat($who, $message) {
-        $chats = getJsonFromFile('tmp/chat.json');
+        $chats = getJsonFromFile('chat.json');
         $id = $_SESSION['chat'];
         if($id === null || $chats->$id === null) return false;
         if (empty($chats->$id->history)) $chats->$id->history = array();
-        $formattedMessage = '<b>'.$who.':</b> '.$message.'<br>';
+        $formattedMessage = $who.': '.$message;
         array_push($chats->$id->history, $formattedMessage);
-        setJsonToFile('tmp/chat.json', $chats);
-        return json_encode($chats->$id->history);
+        setJsonToFile('chat.json', $chats);
+        return getChatHistory($id, $chats);
     }
 
     function showChat() {
-        $users = getJsonFromFile('tmp/users.json');
+        $users = getJsonFromFile('users.json');
         if(isset($users->$_SESSION['user']->chat)) {
             $_SESSION['status'] = 2;
             $_SESSION['chat'] = $users->$_SESSION['user']->chat;
