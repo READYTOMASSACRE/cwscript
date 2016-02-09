@@ -78,7 +78,6 @@
 
 
 	function garbageCollector($params) {
-
 		if(isset($_SESSION['user'])) {
 			$users = getJsonFromFile('users.json');
 
@@ -104,7 +103,7 @@
 				// old data, need update
 				else {
 					$_SESSION['user'] = null;
-					addUser();
+					garbageCollector();
 				} 
 			}
 			return $_SESSION['user'];

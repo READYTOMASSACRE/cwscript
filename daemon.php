@@ -5,10 +5,18 @@
 	print("\n[SEARCH] daemon started at ".date('Y/d/m H:i:s'));
 
 	while(1) {
+		$dropTimer = $dropTimer ? $dropTimer : 0;
+
+		if($dropTimer == 16) {
+			$dropTimer = 0;
+			dropUsersBySession(60);
+		}
+
 		$result = search();
 		$result = $result ? 'Search success' : 'Not users for searching. Still work..';
 		writelog('[Daemon.php] ['.date('Y/d/m H:i:s').'] Search executed with status: '.$result);
 		sleep(8);
+		$dropTimer += 8;
 	}
 
 	function writelog($string) {

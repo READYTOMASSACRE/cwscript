@@ -65,8 +65,9 @@
 	function dropUsersBySession($timeout) {
 		$users = getJsonFromFile('users.json');
 		foreach($users as $id => $user) {
-			if($id[0] == 'g' &&  ((time() - $user->visited) > $timeout))
-				dropUser($users, $id);
+			if($id[0] == 'g')
+				if( (time() - $user->visited) > $timeout && $user->online == false)
+					dropUser($users, $id);
 		}
 		return setJsonToFile('users.json', $users);
 	}
